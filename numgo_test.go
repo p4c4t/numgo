@@ -28,6 +28,24 @@ func TestMult(test *testing.T) {
 	numgo.Print(*numgo.Mult(c, d))
 }
 
+func TestNeg(test *testing.T) {
+	a := numgo.Make(5)
+	c := numgo.SmRandFill(&a)
+	d := numgo.Neg(c)
+	numgo.Print(*c)
+	numgo.Print(*d)
+	numgo.Print(*numgo.Add(c, d))
+}
+
+func TestScal(test *testing.T) {
+	a := numgo.Make(5)
+	c := numgo.SmRandFill(&a)
+	d := numgo.Scale(c, -2)
+	numgo.Print(*c)
+	numgo.Print(*d)
+	numgo.Print(*numgo.Add(c, d))
+}
+
 func BenchmarkAddParallel20(bench *testing.B) {
 	a, b := numgo.Make(1e8), numgo.Make(1e8)
 	numgo.Add(&a, &b)

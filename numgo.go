@@ -137,3 +137,23 @@ func SmRandFill(a *Int64Array) *Int64Array {
 		20,
 	)
 }
+
+func Neg(a *Int64Array) *Int64Array {
+	return UnOperateParallel(
+		a,
+		func(x int64) int64 {
+			return -x
+		},
+		20,
+	)
+}
+
+func Scale(a *Int64Array, x int64) *Int64Array {
+	return UnOperateParallel(
+		a,
+		func(y int64) int64 {
+			return y * x
+		},
+		20,
+	)
+}
