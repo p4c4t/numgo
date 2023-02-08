@@ -18,33 +18,52 @@ func Make(length uint) Int64Array {
 	}
 }
 
-func AddSlow(res, a, b *[]int64, start, end uint) {
+type BinaryByElemFunc func(int64, int64) int64
+
+func BinOperateSlow(res, a, b *[]int64, start, end uint, op BinaryByElemFunc) {
 	for i := uint(start); i < uint(end); i++ {
-		(*res)[i] = (*a)[i] + (*b)[i]
+		(*res)[i] = op((*a)[i], (*b)[i])
 	}
 }
 
-func AddParallel(res, a, b *[]int64, n uint, threads uint) {
-	assert(threads != 0, "we can't just do nothing!")
-	for i := uint(0); i < threads; i++ {
-		go AddSlow(
-			res,
-			a, b,
-			(n*i)/threads, (n*(i+1))/threads,
-		)
-	}
-}
-
-func Add(a, b *Int64Array) Int64Array {
+func BinOperateParallel(a, b *Int64Array, op BinaryByElemFunc, threads uint) *Int64Array {
 	assert(
 		a.length == b.length,
 		"Arrays must have the same length",
 	)
+	assert(
+		threads != 0,
+		"we can't just do nothing!",
+	)
 	n := a.length
-	c := Int64Array{
-		length: n,
-		data:   make([]int64, n),
+	res := Make(n)
+	for i := uint(0); i < threads; i++ {
+		go BinOperateSlow(
+			&res.data,
+			&a.data, &b.data,
+			(n*i)/threads, (n*(i+1))/threads,
+			op,
+		)
 	}
-	AddParallel(&c.data, &a.data, &b.data, n, 8)
-	return c
+	return &res
+}
+
+func Add(a, b *Int64Array) *Int64Array {
+	return BinOperateParallel(
+		a, b,
+		func(a, b int64) int64 {
+			return a + b
+		},
+		20,
+	)
+}
+
+func Dot(a, b *Int64Array) *Int64Array {
+	return BinOperateParallel(
+		a, b,
+		func(a, b int64) int64 {
+			return a * b
+		},
+		20,
+	)
 }
