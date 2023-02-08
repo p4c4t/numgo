@@ -11,28 +11,38 @@ func assert(b bool, errmsg string) {
 	}
 }
 
-type Int64Array struct {
-	length uint
-	data   []int64
+type constr_number interface {
+	int | int8 | int16 | int32 | int64 |
+		uint | uint8 | uint16 | uint32 | uint64 |
+		float32 | float64
 }
 
-func Make(length uint) Int64Array {
-	return Int64Array{
+func random[T constr_number]() T {
+	return T(rand.Int())
+}
+
+type ngarray[T constr_number] struct {
+	length uint
+	data   []T
+}
+
+func Make[T constr_number](length uint) ngarray[T] {
+	return ngarray[T]{
 		length: length,
-		data:   make([]int64, length),
+		data:   make([]T, length),
 	}
 }
 
-func Print(a Int64Array) {
+func Print[T constr_number](a ngarray[T]) {
 	for _, x := range a.data {
 		print(x, " ")
 	}
 	println()
 }
 
-type BinaryByElemFunc func(int64, int64) int64
+type BinaryByElemFunc[T constr_number] func(T, T) T
 
-func BinOperateSlow(res, a, b *[]int64, start, end uint, op BinaryByElemFunc, wg *sync.WaitGroup) {
+func BinOperateSlow[T constr_number](res, a, b *[]T, start, end uint, op BinaryByElemFunc[T], wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for i := uint(start); i < uint(end); i++ {
@@ -40,7 +50,7 @@ func BinOperateSlow(res, a, b *[]int64, start, end uint, op BinaryByElemFunc, wg
 	}
 }
 
-func BinOperateParallel(a, b *Int64Array, op BinaryByElemFunc, threads uint) *Int64Array {
+func BinOperateParallel[T constr_number](a, b *ngarray[T], op BinaryByElemFunc[T], threads uint) *ngarray[T] {
 	assert(
 		a.length == b.length,
 		"Arrays must have the same length",
@@ -50,7 +60,7 @@ func BinOperateParallel(a, b *Int64Array, op BinaryByElemFunc, threads uint) *In
 		"we can't just do nothing!",
 	)
 	n := a.length
-	res := Make(n)
+	res := Make[T](n)
 	var wg sync.WaitGroup
 	for i := uint(0); i < threads; i++ {
 		wg.Add(1)
@@ -66,29 +76,29 @@ func BinOperateParallel(a, b *Int64Array, op BinaryByElemFunc, threads uint) *In
 	return &res
 }
 
-func Add(a, b *Int64Array) *Int64Array {
+func Add[T constr_number](a, b *ngarray[T]) *ngarray[T] {
 	return BinOperateParallel(
 		a, b,
-		func(a, b int64) int64 {
+		func(a, b T) T {
 			return a + b
 		},
 		20,
 	)
 }
 
-func Mult(a, b *Int64Array) *Int64Array {
+func Mult[T constr_number](a, b *ngarray[T]) *ngarray[T] {
 	return BinOperateParallel(
 		a, b,
-		func(a, b int64) int64 {
+		func(a, b T) T {
 			return a * b
 		},
 		20,
 	)
 }
 
-type UnaryByElemFunc func(int64) int64
+type UnaryByElemFunc[T constr_number] func(T) T
 
-func UnOperateSlow(res, a *[]int64, start, end uint, op UnaryByElemFunc, wg *sync.WaitGroup) {
+func UnOperateSlow[T constr_number](res, a *[]T, start, end uint, op UnaryByElemFunc[T], wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for i := uint(start); i < uint(end); i++ {
@@ -96,13 +106,13 @@ func UnOperateSlow(res, a *[]int64, start, end uint, op UnaryByElemFunc, wg *syn
 	}
 }
 
-func UnOperateParallel(a *Int64Array, op UnaryByElemFunc, threads uint) *Int64Array {
+func UnOperateParallel[T constr_number](a *ngarray[T], op UnaryByElemFunc[T], threads uint) *ngarray[T] {
 	assert(
 		threads != 0,
 		"we can't just do nothing!",
 	)
 	n := a.length
-	res := Make(n)
+	res := Make[T](n)
 	var wg sync.WaitGroup
 	for i := uint(0); i < threads; i++ {
 		wg.Add(1)
@@ -118,40 +128,40 @@ func UnOperateParallel(a *Int64Array, op UnaryByElemFunc, threads uint) *Int64Ar
 	return &res
 }
 
-func RandFill(a *Int64Array) *Int64Array {
+func RandFill[T constr_number](a *ngarray[T]) *ngarray[T] {
 	return UnOperateParallel(
 		a,
-		func(x int64) int64 {
-			return rand.Int63()
+		func(x T) T {
+			return random[T]()
 		},
 		20,
 	)
 }
 
-func SmRandFill(a *Int64Array) *Int64Array {
+func SmRandFill[T constr_number](a *ngarray[T]) *ngarray[T] {
 	return UnOperateParallel(
 		a,
-		func(x int64) int64 {
-			return rand.Int63n(10)
+		func(x T) T {
+			return random[T]()
 		},
 		20,
 	)
 }
 
-func Neg(a *Int64Array) *Int64Array {
+func Neg[T constr_number](a *ngarray[T]) *ngarray[T] {
 	return UnOperateParallel(
 		a,
-		func(x int64) int64 {
+		func(x T) T {
 			return -x
 		},
 		20,
 	)
 }
 
-func Scale(a *Int64Array, x int64) *Int64Array {
+func Scale[T constr_number](a *ngarray[T], x T) *ngarray[T] {
 	return UnOperateParallel(
 		a,
-		func(y int64) int64 {
+		func(y T) T {
 			return y * x
 		},
 		20,

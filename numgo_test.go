@@ -6,14 +6,14 @@ import (
 )
 
 func TestRand(test *testing.T) {
-	a, b := numgo.Make(5), numgo.Make(5)
+	a, b := numgo.Make[int64](5), numgo.Make[int64](5)
 	c, d := numgo.SmRandFill(&a), numgo.RandFill(&b)
 	numgo.Print(*c)
 	numgo.Print(*d)
 }
 
 func TestAdd(test *testing.T) {
-	a, b := numgo.Make(5), numgo.Make(5)
+	a, b := numgo.Make[int64](5), numgo.Make[int64](5)
 	c, d := numgo.SmRandFill(&a), numgo.SmRandFill(&b)
 	numgo.Print(*c)
 	numgo.Print(*d)
@@ -21,7 +21,7 @@ func TestAdd(test *testing.T) {
 }
 
 func TestMult(test *testing.T) {
-	a, b := numgo.Make(5), numgo.Make(5)
+	a, b := numgo.Make[int64](5), numgo.Make[int64](5)
 	c, d := numgo.SmRandFill(&a), numgo.SmRandFill(&b)
 	numgo.Print(*c)
 	numgo.Print(*d)
@@ -29,7 +29,7 @@ func TestMult(test *testing.T) {
 }
 
 func TestNeg(test *testing.T) {
-	a := numgo.Make(5)
+	a := numgo.Make[int64](5)
 	c := numgo.SmRandFill(&a)
 	d := numgo.Neg(c)
 	numgo.Print(*c)
@@ -38,7 +38,7 @@ func TestNeg(test *testing.T) {
 }
 
 func TestScal(test *testing.T) {
-	a := numgo.Make(5)
+	a := numgo.Make[int64](5)
 	c := numgo.SmRandFill(&a)
 	d := numgo.Scale(c, -2)
 	numgo.Print(*c)
@@ -47,6 +47,6 @@ func TestScal(test *testing.T) {
 }
 
 func BenchmarkAddParallel20(bench *testing.B) {
-	a, b := numgo.Make(1e8), numgo.Make(1e8)
+	a, b := numgo.Make[int64](1e8), numgo.Make[int64](1e8)
 	numgo.Add(&a, &b)
 }
