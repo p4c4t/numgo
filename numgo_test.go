@@ -1,7 +1,7 @@
 package numgo_test
 
 import (
-	"numgo"
+	"example.com/numgo"
 	"testing"
 )
 
