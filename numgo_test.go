@@ -1,8 +1,9 @@
 package numgo_test
 
 import (
-	"example.com/numgo"
 	"testing"
+
+	"example.com/numgo"
 )
 
 func TestRand(test *testing.T) {
@@ -48,5 +49,7 @@ func TestScal(test *testing.T) {
 
 func BenchmarkAddParallel20(bench *testing.B) {
 	a, b := numgo.Make[int64](1e8), numgo.Make[int64](1e8)
-	numgo.Add(&a, &b)
+	for i := 0; i < bench.N; i++ {
+		numgo.Add(&a, &b)
+	}
 }
